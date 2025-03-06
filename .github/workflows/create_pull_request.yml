@@ -1,0 +1,61 @@
+name: Automated PR from Develop to Main
+
+on:
+  # Trigger when push to develop branch
+  push:
+    branches:
+      - develop
+  # Optional: Allow manual trigger from Actions tab
+  workflow_dispatch:
+
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full git history for accurate PR
+      
+      - name: Setup Git Identity
+        run: |
+          git config --global user.name "Tushar"
+          git config --global user.email "tushar.patil@godigitaltc.com"
+          
+      - name: Create Pull Request
+        id: create-pr
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Automated PR from develop to main"
+          title: "Merge develop into main"
+          body: |
+            This is an automated pull request to merge changes from `develop` branch into `main`.
+            
+            ### Changes included in this PR:
+            ${{ github.event.head_commit.message }}
+          branch: develop
+          base: main
+          
+      # - name: Send Email Notification
+      #   if: steps.create-pr.outputs.pull-request-number
+      #   uses: dawidd6/action-send-mail@v3
+      #   with:
+      #     server_address: ${{ secrets.MAIL_SERVER }}
+      #     server_port: ${{ secrets.MAIL_PORT }}
+      #     username: ${{ secrets.MAIL_USERNAME }}
+      #     password: ${{ secrets.MAIL_PASSWORD }}
+      #     subject: "Pull Request Created: develop → main"
+      #     to: "${{ secrets.NOTIFICATION_EMAIL }}"
+      #     from: GitHub Actions <github-actions@example.com>
+      #     body: |
+      #       A new Pull Request has been created to merge changes from develop to main branch.
+            
+      #       PR Number: ${{ steps.create-pr.outputs.pull-request-number }}
+      #       PR URL: ${{ steps.create-pr.outputs.pull-request-url }}
+            
+      #       Changes included:
+      #       ${{ github.event.head_commit.message }}
+            
+      #       Please review the changes at your earliest convenience.
